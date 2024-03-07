@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
 });
 
 const imageFilter = (req, file, callback) => {
-    if(!file.originalname.match(/\.(jpg|jpeg|png)$/i)){
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/i)) {
         return callback(new Error("Only image files are allowed!"), false);
     }
     callback(null, true);
@@ -44,7 +44,7 @@ router.get("/", isLoggedIn, (req, res) => {
             model: "Post"
         }
     })
-    .populate("post")
+    .populate("posts")
     .exec((err, user) => {
         if(err){
             console.log(err);

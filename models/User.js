@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
 const passportLocalMongoose = require("passport-local-mongoose");
 
-let UserSchema = new mongoose.Schema({
+let UserSchema = new mongoose.Schema({ // 사용자 스키마
     username: String,
     firstName: String,
     lastName: String,
-    passoword: String,
+    password: String,
     profile: String,
-    post: [
+    posts: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Post"
@@ -16,23 +16,24 @@ let UserSchema = new mongoose.Schema({
 
     liked_posts: [
         {
-            type:mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
             ref: "Post"
         }
     ],
-    liked_comments:[
+
+    liked_comments: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Post"
         }
     ],
-    friends:[
+    friends: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User"
         }
     ],
-    friedRequests:[
+    friendRequests: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User"
