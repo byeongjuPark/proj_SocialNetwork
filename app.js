@@ -1,4 +1,6 @@
 const express = require("express");
+const morgan = require("morgan");
+const winston = require("winston");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const cookieParser = require('cookie-parser');
@@ -22,6 +24,12 @@ const app = express();
 
 app.set("view engine", "ejs");
 
+if(process.env.NODE_ENV === 'production'){
+    app.use(morgan('combined'));
+} else {
+    app.use(morgan('dev'));
+}
+
 app.use(cookieParser(process.SECRET));
 app.use(session({
     secret: process.env.SECRET, 
@@ -41,7 +49,9 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));
 
 mongoose.connect('mongodb://127.0.0.1:27017/bangsoft')
-  .then(() => console.log('Connected!'));
+  .then(() => console.log('Connected!')).catch((err) => {
+    winston.error(err);
+  })
 /*
 mongoose.connect("mongodb://127.0.01:27017/bangsoft", {
     useNewUrlParser: true,
@@ -65,14 +75,14 @@ app.use("/", userRoutes);
 app.use("/", postRoutes);
 
 const server = app.listen(port, () => {
-    console.log("App is running on port" + port);
+    winston.info(`App is running on ${port}`);
 });
 
 const io = socket(server);
 
 const room = io.of("/chat");
 room.on("connection", socket => {
-    console.log("new user : ", socket.id);
+    winston.info("new user : ", socket.id);
     room.emit("newUser", {socketID:socket.id});
 
     socket.on("newUser", data =>{
@@ -80,18 +90,18 @@ room.on("connection", socket => {
             onlineChatUsers[data.name] = data.socketID;
             socket.name = data.name;
             room.emit("updateUserList", Object.keys(onlineChatUsers));
-            console.log("Online users: "+ Object.keys(onlineChatUsers));
+            winston.info("Online users: "+ Object.keys(onlineChatUsers));
         }
     });
 
     socket.on("disconnect", () => {
         delete onlineChatUsers[socket.name];
         room.emit("updateUserList", Object.keys(onlineChatUsers));
-        console.log(`user ${socket.name} disconneceted`);
+        winston.info(`user ${socket.name} disconneceted`);
     });
 
     socket.on("chat", data => {
-        console.log(data);
+        winston.info(data);
         if(data.to === "Global Chat"){
             room.emit("chat", data);
         } else if(data.to){
